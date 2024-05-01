@@ -1,0 +1,7 @@
+Logging.
+
+The Launcher will normaly only have its local log.
+But on request (Bug Report) the user can upload theyr logs to the api.
+
+The Launcher will also create a local log file in the users AppData folder for debugging purposes when crashing etc.
+

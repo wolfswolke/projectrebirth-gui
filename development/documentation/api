@@ -1,0 +1,15 @@
+The Launcher will get all its info from the API
+
+The Main window will have a list of all games that are supported.
+Those will be displayed in a Grid with theyr image and have info shown on it.
+
+When clicked it will change to the game page which will show some standard info
+like where it came from (Steam, Uplay, Browser,...) Its latest Version, If its still publiclly available,
+The Team that made the servers, a PATCH and START Button.
+
+The launcher will then try to search for the game if its steam and if it cant find it or
+its not from steam open a window for the user to open the main folder of the game.
+
+After that the Client will run its file logic to patch the game.
+
+If the game is not publically available anymore it will download it.
