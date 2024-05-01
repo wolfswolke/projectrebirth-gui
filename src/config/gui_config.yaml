@@ -1,0 +1,16 @@
+global:
+  name: Project Rebirth Launcher
+  version: 0.0.1
+  level: debug
+urls:
+  api: https://api.projectrebirth.net
+  website: https://projectrebirth.net
+endpoints:
+  healthcheck: /api/v1/healthcheck
+  api_version: /api/v1/version
+  launcher: /api/v1/launcher
+  launcher_download: /api/v1/launcher/download
+  launcher_version: /api/v1/launcher/version
+  image: /favicon.ico
+  log_upload: /api/v1/log
+  bug_report: /api/v1/bug_report
