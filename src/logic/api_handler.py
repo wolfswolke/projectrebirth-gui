@@ -59,3 +59,48 @@ class ApiHandler:
 
 
 api_handler = ApiHandler()
+
+
+
+# App get from API
+# @app.route('/api/v1/launcher/game', methods=["GET"])
+#         # Status shown, hidden
+#         data = {
+#             "games": [
+#                 {
+#                     "name": "Deathgarden Bloodharvest",
+#                     "image": "https://via.placeholder.com/150",
+#                     "status": "shown"
+#                 },
+#                 {
+#                     "name": "VHS (Video Horror Society)",
+#                     "image": "https://via.placeholder.com/150",
+#                     "status": "shown"
+#                 }
+#             ]
+#         }
+#         return jsonify(data)
+#     except TimeoutError:
+#         return jsonify({"status": "error"})
+#     except Exception as e:
+#         logger.graylog_logger(level="error", handler="general-launcher-games", message=e)
+#         return jsonify({"status": "error"})
+#
+#
+# @app.route('/api/v1/launcher/game/<game>', methods=["GET"])
+#         # Status online, maintenance, offline, error
+#         logger.graylog_logger(level="info", handler="launcher_game", message=f"Game Req: {game}")
+#         return jsonify({
+#             "version": "1.0.0",
+#             "image": "https://via.placeholder.com/150",
+#             "description": "Placeholder description",
+#             "team": "Team behind the rebirth",
+#             "status": "online",
+#             "origin": "https://store.steampowered.com/app/10/",
+#             "official": True
+#         })
+#     except TimeoutError:
+#         return jsonify({"status": "error"})
+#     except Exception as e:
+#         logger.graylog_logger(level="error", handler="general-launcher-game", message=e)
+#         return jsonify({"status": "error"})
