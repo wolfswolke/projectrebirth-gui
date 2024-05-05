@@ -11,6 +11,7 @@ endpoints:
   launcher: /api/v1/launcher
   launcher_download: /api/v1/launcher/download
   launcher_version: /api/v1/launcher/version
+  launcher_game: /api/v1/launcher/game
   image: /favicon.ico
   log_upload: /api/v1/log
   bug_report: /api/v1/bug_report
