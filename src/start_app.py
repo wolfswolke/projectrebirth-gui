@@ -1,10 +1,28 @@
 from logic.logging_handler import logger
 from logic.setup_handlers import load_config
 from logic.api_handler import api_handler
+from logic.file_handler import file_handler
+from logic.window_handler import MainWindow
+
+# Testing / Handling imports
+import threading
+import time
+import json
+
+# QT Imports
+from PyQt5.QtWidgets import QApplication
+import sys
+
+
+api_status = False
+lock = threading.Lock()
 
 
 def start_app():
-    pass
+    app = QApplication(sys.argv)
+    win = MainWindow()
+    win.show()
+    sys.exit(app.exec_())
 
 
 def check_for_updates():
@@ -17,14 +35,60 @@ def check_for_updates():
         return False
 
 
+def get_health():
+    global api_status
+    try:
+        health_check_result = api_handler.get_healthcheck()
+        if health_check_result.json()["Health"] == "Alive":
+            with lock:
+                api_status = True
+        else:
+            with lock:
+                api_status = False
+    except Exception as e:
+        with lock:
+            api_status = False
+        print("Error checking API health:", e)
+
+
+def update_health_thread():
+    while True:
+        get_health()
+        time.sleep(5)
+
+
 if __name__ == "__main__":
-    config = load_config()
+    try:
+        config = load_config()
 
-    name = config["global"]["name"]
-    gui_version = config["global"]["version"]
-    level = config["global"]["level"]
-    website_url = config["urls"]["website"]
-    logger.setup_logging(level=level)
+        name = config["global"]["name"]
+        gui_version = config["global"]["version"]
+        level = config["global"]["level"]
+        website_url = config["urls"]["website"]
+        logger.setup_logging(level=level)
+        api_handler.setup(config)
 
-    api_handler.setup(config)
-    start_app()
+        api_thread = threading.Thread(target=update_health_thread)
+        api_thread.daemon = True
+        api_thread.start()
+
+        check_for_updates()
+        # todo REMOVE this testing code when done TM
+        while True:
+            logger.log(level="info", handler="start", message=f"API Status: {api_status}")
+            # Try to get games
+            games = api_handler.get_games()
+            logger.log(level="info", handler="start", message=games.json())
+            # Try to get one games content
+            game = api_handler.get_game("deathgarden")
+            logger.log(level="info", handler="start", message=game.json())
+            # Get Patch
+            patch = api_handler.get_patch("deathgarden")
+            logger.log(level="info", handler="start", message=patch.json())
+
+
+            start_app()
+            time.sleep(50)
+    except KeyboardInterrupt:
+        logger.log(level="info", handler="start", message="Shutting down")
+        exit(0)
