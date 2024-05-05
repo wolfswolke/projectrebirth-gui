@@ -14,6 +14,7 @@ class ApiHandler:
         self.image = ""
         self.log_upload = ""
         self.bug_report = ""
+        self.launcher_game = ""
 
     def setup(self, config):
         self.api_url = config["urls"]["api"]
@@ -21,6 +22,7 @@ class ApiHandler:
         self.api_version = config["endpoints"]["api_version"]
         self.launcher_download = config["endpoints"]["launcher_download"]
         self.launcher_version = config["endpoints"]["launcher_version"]
+        self.launcher_game = config["endpoints"]["launcher_game"]
         self.image = config["endpoints"]["image"]
         self.log_upload = config["endpoints"]["log_upload"]
         self.bug_report = config["endpoints"]["bug_report"]
@@ -55,7 +57,23 @@ class ApiHandler:
         return requests.get(self.api_url + self.launcher_version)
 
     def get_image(self, image):
+        # todo remove placeholder code
+        return requests.get("https://via.placeholder.com/150")
         return requests.get(self.api_url + self.image + image)
+
+    def get_games(self):
+        # Status shown, hidden
+        return requests.get(self.api_url + self.launcher_game)
+
+    def get_game(self, game):
+        # Status online, maintenance, offline, error
+        return requests.get(self.api_url + self.launcher_game + "/" + game)
+
+    def get_patch(self, game):
+        return requests.get(self.api_url + self.launcher_game + "/" + game + "/patch")
+
+    def download_file(self, file_id):
+        return requests.get(self.api_url + "/file" + file_id)
 
 
 api_handler = ApiHandler()
