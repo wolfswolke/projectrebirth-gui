@@ -63,7 +63,7 @@ class ApiHandler:
 
     def get_games(self):
         # Status shown, hidden
-        return requests.get(self.api_url + self.launcher_game)
+        return requests.get(self.api_url + self.launcher_game).json()
 
     def get_game(self, game):
         # Status online, maintenance, offline, error
