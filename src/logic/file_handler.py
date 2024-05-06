@@ -23,6 +23,13 @@ class File_Handler:
             with open(self.path + file_id, "wb") as f:
                 f.write(file.content)
 
+    def rename(self, files):
+        for file in files:
+            name = file["name"]
+            new_name = file["new_name"]
+            path = file["path"]
+            os.rename(self.path + path + name, self.path + path + new_name)
+
     def download_base_game(self, provider, content):
         if provider == "steam":
             if content["mode"] == "live":
