@@ -1,3 +1,5 @@
+from logic.logging_handler import logger
+
 
 class SteamLibraryFoldersParser:
     def __init__(self):
@@ -6,21 +8,30 @@ class SteamLibraryFoldersParser:
         self.games = []
 
     def setup(self, config):
+        logger.log(level="debug", handler="steam_parser", message=f"Setting up steam parser with config: {config}")
         self.custom_path = config["steam"]["custom_path"]
 
     def add_game(self, app_id, path):
+        logger.log(level="debug", handler="steam_parser", message=f"Adding game: {app_id} with path: {path}")
         self.games.append({"app_id": app_id, "path": path})
 
     def get_games(self):
+        logger.log(level="debug", handler="steam_parser", message=f"Getting games: {self.games}")
         return self.games
 
     def get_path(self, app_id):
+        logger.log(level="debug", handler="steam_parser", message=f"Getting path for game: {app_id}")
         for game in self.games:
             if game["app_id"] == app_id:
+                logger.log(level="debug", handler="steam_parser", message=f"Found path: {game['path']}")
                 return game["path"]
+        logger.log(level="error", handler="steam_parser", message=f"Path not found for game: {app_id}")
         return None
 
     def parse(self):
+        logger.log(level="debug", handler="steam_parser", message="Parsing games")
+        self.games = []
+        logger.log(level="debug", handler="steam_parser", message="Cleared games list")
         if self.custom_path == "":
             file_path = self.default_path
         else:
@@ -36,6 +47,7 @@ class SteamLibraryFoldersParser:
                     obj = line.split('\t\t\t')[1].strip()
                     app_id = int(obj.split('"')[1])
                     self.add_game(app_id, current_path)
+        logger.log(level="info", handler="steam_parser", message="Parsing complete")
 
 
 steam_parser = SteamLibraryFoldersParser()
