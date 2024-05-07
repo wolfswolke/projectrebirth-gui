@@ -41,7 +41,9 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Project Rebirth Launcher")
-        self.setGeometry(200, 200, 800, 600)
+        # 1400x700
+        self.setGeometry(200, 200, 1400, 700)
+        self.setStyleSheet("background-color: #333333; color: white;")
 
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
@@ -53,14 +55,17 @@ class MainWindow(QMainWindow):
         layout.addWidget(sidebar_widget)
 
         button1 = QPushButton("Open Main")
+        button1.setStyleSheet("background-color: #6A5ACD; color: white;")
         button1.clicked.connect(lambda: logger.log(level="info", handler="window_handler", message="Button 1 clicked"))
         sidebar_layout.addWidget(button1)
 
         button_settings = QPushButton("Open Settings")
+        button_settings.setStyleSheet("background-color: #6A5ACD; color: white;")
         button_settings.clicked.connect(open_settings_window)
         sidebar_layout.addWidget(button_settings)
 
         button_website = QPushButton("Open Website")
+        button_website.setStyleSheet("background-color: #6A5ACD; color: white;")
         button_website.clicked.connect(open_website)
         sidebar_layout.addWidget(button_website)
 
@@ -94,18 +99,25 @@ class MainWindow(QMainWindow):
                 game_list.remove(hidden_item)
                 logger.log(level="info", handler="window_handler", message=f"Removed hidden game: {hidden_item['ID']}")
         self.table.setRowCount(len(game_list))
+        self.table.setStyleSheet("background-color: #333333; color: white;")
+        num = 0
         for i, item in enumerate(game_list):
             name_item = QTableWidgetItem(item["name"])
             self.table.setItem(i, 0, name_item)
             image_label = QLabel()
             pixmap = QPixmap()
             pixmap.loadFromData(api_handler.get_image(item["image_url"]).content)
-            pixmap = pixmap.scaledToWidth(100)
+            pixmap = pixmap.scaledToWidth(300)
+            pixmap = pixmap.scaledToHeight(450)
+            self.table.setRowHeight(num, 450)
             image_label.setPixmap(pixmap)
             self.table.setCellWidget(i, 1, image_label)
             open_button = QPushButton("Open")
+            open_button.setStyleSheet("background-color: #6A5ACD; color: white;")
             open_button.clicked.connect(lambda checked, item_id=item["ID"]: show_subview(item_id))
             self.table.setCellWidget(i, 2, open_button)
+            num += 1
+        self.table.setColumnWidth(1, 300)
 
 
 class SubView(QDialog):
@@ -175,25 +187,38 @@ class SubView(QDialog):
             message_box("Error", "Failed to patch game").exec_()
 
 
+def patch():
+    ret_val = steam_parser.parse()
+    if ret_val:
+        message_box("Success", "Steam library scanned successfully").exec_()
+    else:
+        message_box("Error", "Failed to scan steam library").exec_()
+
+
 class SettingsWindow(QDialog):
     def __init__(self):
         super().__init__()
         logger.log(level="debug", handler="window_handler", message="Opening settings window")
         self.setWindowTitle("Settings")
         self.setGeometry(300, 300, 300, 200)
+        self.setStyleSheet("background-color: #333333; color: white;")
         config = load_config()
 
         layout = QVBoxLayout()
         steam_scan = QPushButton("Rescan Steam Library")
-        steam_scan.clicked.connect(steam_parser.parse)
+        steam_scan.setStyleSheet("background-color: #6A5ACD; color: white;")
+        steam_scan.clicked.connect(lambda: patch())
         layout.addWidget(steam_scan)
         button_report_bug = QPushButton("Report a Bug")
+        button_report_bug.setStyleSheet("background-color: #6A5ACD; color: white;")
         # todo add logic to open a bug report form
         layout.addWidget(button_report_bug)
         button_request_feature = QPushButton("Request a Feature")
+        button_request_feature.setStyleSheet("background-color: #6A5ACD; color: white;")
         # todo add logic to open a feature request form
         layout.addWidget(button_request_feature)
         button_check_for_updates = QPushButton("Check for Updates")
+        button_check_for_updates.setStyleSheet("background-color: #6A5ACD; color: white;")
         button_check_for_updates.clicked.connect(lambda: updater_notification(api_handler.get_launcher_version().json()).exec_())
         layout.addWidget(button_check_for_updates)
         path_label = QLabel("Custom Steam Path:")
@@ -216,6 +241,7 @@ class updater_notification(QDialog):
         logger.log(level="debug", handler="window_handler", message="Opening updater message window")
         self.setWindowTitle("Checking for Updates")
         self.setGeometry(300, 300, 300, 200)
+        self.setStyleSheet("background-color: #333333; color: white;")
         # status: {"version":"0.0.1"}
         layout = QVBoxLayout()
         current_version = load_config()["global"]["version"]
@@ -234,6 +260,7 @@ class message_box(QDialog):
         logger.log(level="debug", handler="window_handler", message="Opening message box")
         self.setWindowTitle(title)
         self.setGeometry(300, 300, 300, 200)
+        self.setStyleSheet("background-color: #333333; color: white;")
         layout = QVBoxLayout()
         message_label = QLabel(message)
         layout.addWidget(message_label)
