@@ -85,25 +85,8 @@ if __name__ == "__main__":
         # todo REMOVE this testing code when done TM
         while True:
             logger.log(level="info", handler="start", message=f"API Status: {api_status}")
-            # Try to get games
-            games = api_handler.get_games()
-            for game_content in games["games"]:
-                logger.log(level="info", handler="start", message=f"Found game: {game_content['name']}")
-                logger.log(level="info", handler="start", message=f"ID: {game_content['id']}, status: {game_content['status']}, image_url: {game_content['image']}")
-                # Try to get one games content
-                game_id = game_content["id"]
-                game = api_handler.get_game(game_id)
-                logger.log(level="info", handler="start", message=f"Game Info: {game.json()}")
-                # Get Patch
-                patch = api_handler.get_patch(game_id)
-                logger.log(level="info", handler="start", message=f"Patch for this game: {patch.json()}")
-            # Try searching for games
-            test_ids = [555440, 228980, 111111111111111111111111]
-            # DGBH and Steamworks and something that should not exist
-            for game_id in test_ids:
-                game = steam_parser.get_path(game_id)
-                logger.log(level="info", handler="start", message=f"Path for {game_id}: {game}")
-
+            logger.log(level="debug", handler="start", message="STARING MAIN WINDOW")
+            logger.log(level="debug", handler="start", message="----------------------------------------------------")
             start_app()
             time.sleep(50)
     except KeyboardInterrupt:
