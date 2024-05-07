@@ -1,6 +1,6 @@
 import os
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, \
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, \
     QWidget, QHBoxLayout, QLabel, QDialog, QLineEdit, QGridLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
@@ -8,6 +8,8 @@ from PyQt5.QtCore import Qt
 from logic.api_handler import api_handler
 from logic.steam_parser import steam_parser
 from logic.logging_handler import logger
+from logic.file_handler import file_handler
+from logic.setup_handlers import update_config_item, load_config
 
 
 def open_website():
@@ -137,12 +139,14 @@ class SubView(QDialog):
 
         download_button = QPushButton("Download Game")
         download_button.setStyleSheet("background-color: #6A5ACD; color: white;")
-        # if button pressed call download_game(game_id)
-        download_button.clicked.connect(lambda: steam_parser.download_game(game_id))
+        # todo THIS DOES NO EXIST YET
+        # Needs to be added on the API
+        # download_button.clicked.connect(lambda: file_handler.download_base_game(game_id))
         layout.addWidget(download_button, 4, 0, 1, 1)
 
-        path_button = QPushButton("Path Game")
+        path_button = QPushButton("Patch Game")
         path_button.setStyleSheet("background-color: #6A5ACD; color: white;")
+        path_button.clicked.connect(lambda: self.patch_game(game_id))
         layout.addWidget(path_button, 5, 0, 1, 1)
 
         version_label = QLabel(f"Version: {game_info['version']}")
@@ -160,6 +164,15 @@ class SubView(QDialog):
         self.setLayout(layout)
         logger.log(level="debug", handler="window_handler", message=f"Opened subview for game: {game_id}")
 
+    def patch_game(self, game_id):
+        data = api_handler.get_patch(game_id).json()
+        return_val = file_handler.patcher(data)
+        if return_val:
+            logger.log(level="info", handler="window_handler", message=f"Patched game: {game_id}")
+            message_box("Success", "Game patched successfully").exec_()
+        else:
+            logger.log(level="error", handler="window_handler", message=f"Failed to patch game: {game_id}")
+            message_box("Error", "Failed to patch game").exec_()
 
 
 class SettingsWindow(QDialog):
@@ -168,17 +181,60 @@ class SettingsWindow(QDialog):
         logger.log(level="debug", handler="window_handler", message="Opening settings window")
         self.setWindowTitle("Settings")
         self.setGeometry(300, 300, 300, 200)
+        config = load_config()
 
         layout = QVBoxLayout()
-        button1 = QPushButton("Button 1")
-        layout.addWidget(button1)
         steam_scan = QPushButton("Rescan Steam Library")
         steam_scan.clicked.connect(steam_parser.parse)
         layout.addWidget(steam_scan)
-        path_label = QLabel("Text input")
+        button_report_bug = QPushButton("Report a Bug")
+        # todo add logic to open a bug report form
+        layout.addWidget(button_report_bug)
+        button_request_feature = QPushButton("Request a Feature")
+        # todo add logic to open a feature request form
+        layout.addWidget(button_request_feature)
+        button_check_for_updates = QPushButton("Check for Updates")
+        button_check_for_updates.clicked.connect(lambda: updater_notification(api_handler.get_launcher_version().json()).exec_())
+        layout.addWidget(button_check_for_updates)
+        path_label = QLabel("Custom Steam Path:")
         layout.addWidget(path_label)
         self.path_input = QLineEdit()
         layout.addWidget(self.path_input)
+        # todo Add when the Input Path field exists.
+        # update_config_item("steam", "custom_path", "C:\\Program Files (x86)\\Steam\\steamapps\\libraryfolders.vdf")
+        # new_config = load_config()
+        # steam_parser.setup(new_config)
 
         self.setLayout(layout)
         logger.log(level="debug", handler="window_handler", message="Opened settings window")
+
+
+class updater_notification(QDialog):
+    def __init__(self, status):
+        super().__init__()
+        print(status)
+        logger.log(level="debug", handler="window_handler", message="Opening updater message window")
+        self.setWindowTitle("Checking for Updates")
+        self.setGeometry(300, 300, 300, 200)
+        # status: {"version":"0.0.1"}
+        layout = QVBoxLayout()
+        current_version = load_config()["global"]["version"]
+        new_version = status["version"]
+        if current_version != new_version:
+            message = f"New version available: {new_version}. Current version: {current_version}"
+        else:
+            message = f"No new updates available. Current version: {current_version}"
+        message_label = QLabel(message)
+        layout.addWidget(message_label)
+        self.setLayout(layout)
+
+class message_box(QDialog):
+    def __init__(self, title, message):
+        super().__init__()
+        logger.log(level="debug", handler="window_handler", message="Opening message box")
+        self.setWindowTitle(title)
+        self.setGeometry(300, 300, 300, 200)
+        layout = QVBoxLayout()
+        message_label = QLabel(message)
+        layout.addWidget(message_label)
+        self.setLayout(layout)
