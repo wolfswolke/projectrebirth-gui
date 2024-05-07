@@ -1,5 +1,10 @@
 import os
 from logic.api_handler import api_handler
+from logic.logging_handler import logger
+
+
+def check_path_exists(path):
+    return os.path.exists(path)
 
 
 class File_Handler:
@@ -59,52 +64,35 @@ class File_Handler:
         else:
             return None
 
+    def patcher(self, content):
+        try:
+            instructions = content["instructions"]
+            provider = content["provider"]
+            if provider == "steam":
+                steam = content["steam"]
+                app_id = steam["app_id"]
+                path = "aaaaa"
+                # todo on patch add relative path
+            else:
+                path = "bbbbb"
+
+            path_exists = check_path_exists(path)
+            if not path_exists:
+                logger.log(level="error", handler="file_handler", message=f"Path does not exist: {path}")
+                return False
+
+            if "delete" in instructions:
+                self.delete(instructions["delete"])
+            if "move" in instructions:
+                self.move(instructions["move"])
+            if "download" in instructions:
+                self.download(instructions["download"])
+            if "rename" in instructions:
+                self.rename(instructions["rename"])
+            return True
+        except Exception as e:
+            print("Error patching game:", e)
+            return False
+
 
 file_handler = File_Handler()
-
-# Patching instructions would look like this:
-# steam = {"app_id": 480,
-# "depot_id": 481,
-# "manifest_id": 3183503801510301321
-# }
-# .\bnetinstaller.exe --prod prot --uid prometheus_test --lang enus --dir "<PATH>"
-# battlenet = {
-# "product": "prot",
-# "uid": "prometheus_test",
-# "lang": "enus"
-# }
-#         provider = "steam"
-#         provider_value = steam
-#         return jsonify({
-#             "instructions": {
-#                 "delete": [
-#                     "path/file1",
-#                     "path/sub/file2"
-#                 ],
-#                 "move": [
-#                     {
-#                         "name": "file1",
-#                         "source": "path/sub/",
-#                         "location": "path/sub2"
-#                     }
-#                 ],
-#                 "download": [
-#                     {
-#                         "name": "game.exe",
-#                         "location": "path/sub3"
-#                     }
-#                 ]
-#             },
-#             "files": [
-#                 {
-#                     "name": "game.exe",
-#                     "id": "1238712381283"
-#                 },
-#                 {
-#                     "name": "patch.dll",
-#                     "id": "184563454568"
-#                 }
-#             ],
-#             "provider": provider,
-#             provider: provider_value
-#         })
