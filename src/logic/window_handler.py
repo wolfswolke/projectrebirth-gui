@@ -15,6 +15,16 @@ def open_website():
     pass
 
 
+def show_subview(game_id):
+    sub_view = SubView(game_id)
+    sub_view.exec_()
+
+
+def open_settings_window():
+    settings_window = SettingsWindow()
+    settings_window.exec_()
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -36,7 +46,7 @@ class MainWindow(QMainWindow):
         sidebar_layout.addWidget(button1)
 
         button_settings = QPushButton("Open Settings")
-        button_settings.clicked.connect(self.open_settings_window)
+        button_settings.clicked.connect(open_settings_window)
         sidebar_layout.addWidget(button_settings)
 
         button_website = QPushButton("Open Website")
@@ -69,37 +79,22 @@ class MainWindow(QMainWindow):
         for i, item in enumerate(game_list):
             name_item = QTableWidgetItem(item["name"])
             self.table.setItem(i, 0, name_item)
-
             image_label = QLabel()
             pixmap = QPixmap()
             pixmap.loadFromData(api_handler.get_image(item["image_url"]).content)
             pixmap = pixmap.scaledToWidth(100)
             image_label.setPixmap(pixmap)
             self.table.setCellWidget(i, 1, image_label)
-
-            # Add button in the third column that runs get_game for that game ID and opens a new window calles sub_view
             open_button = QPushButton("Open")
-            # todo fix so this gets its OWN ID and not the last one added
-            open_button.clicked.connect(lambda: self.show_subview(item["ID"]))
+            open_button.clicked.connect(lambda checked, item_id=item["ID"]: show_subview(item_id))
             self.table.setCellWidget(i, 2, open_button)
-            #status_item = QTableWidgetItem(item["status"])
-            #self.table.setItem(i, 2, status_item)
-
-    def show_subview(self, game_id):
-        sub_view = SubView(game_id)
-        sub_view.show()
 
 
-    def open_settings_window(self):
-        settings_window = SettingsWindow()
-        settings_window.exec_()
-
-
-class SubView(QMainWindow):
+class SubView(QDialog):
     def __init__(self, game_id):
         super().__init__()
+
         logger.log(level="info", handler="window_handler", message=f"Opening subview for game: {game_id}")
-        game_id = game_id
         # todo rework to not double request. Maybe cache images and or glob vals?
         games = api_handler.get_games()
         for game_content in games["games"]:
