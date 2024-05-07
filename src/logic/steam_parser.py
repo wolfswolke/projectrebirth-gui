@@ -48,7 +48,7 @@ class SteamLibraryFoldersParser:
                     app_id = int(obj.split('"')[1])
                     self.add_game(app_id, current_path)
         logger.log(level="info", handler="steam_parser", message="Parsing complete")
-
+        return True
 
 steam_parser = SteamLibraryFoldersParser()
 
