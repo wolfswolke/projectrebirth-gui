@@ -1,4 +1,5 @@
 import requests
+from logic.logging_handler import logger
 
 
 class ApiHandler:
@@ -54,20 +55,42 @@ class ApiHandler:
         return requests.get(self.api_url + self.launcher_download)
 
     def get_launcher_version(self):
-        return requests.get(self.api_url + self.launcher_version)
+        data = requests.get(self.api_url + self.launcher_version)
+        if data.status_code == 200:
+            return data
+        else:
+            logger.log(level="error", handler="api_handler", message="Error getting launcher version")
+            logger.log(level="error", handler="api_handler", message=data.json())
+            return {"status": "error"}
 
-    def get_image(self, image):
-        # todo remove placeholder code
-        return requests.get("https://via.placeholder.com/150")
-        return requests.get(self.api_url + self.image + image)
+    def get_image(self, url):
+        data = requests.get(url)
+        if data.status_code == 200:
+            return data
+        else:
+            logger.log(level="error", handler="api_handler", message="Error getting image")
+            logger.log(level="error", handler="api_handler", message=data.json())
+            return {"status": "error"}
 
     def get_games(self):
         # Status shown, hidden
-        return requests.get(self.api_url + self.launcher_game).json()
+        data = requests.get(self.api_url + self.launcher_game)
+        if data.status_code == 200:
+            return data.json()
+        else:
+            logger.log(level="error", handler="api_handler", message="Error getting games")
+            logger.log(level="error", handler="api_handler", message=data)
+            return {"status": "error"}
 
     def get_game(self, game):
         # Status online, maintenance, offline, error
-        return requests.get(self.api_url + self.launcher_game + "/" + game)
+        data = requests.get(self.api_url + self.launcher_game + "/" + game)
+        if data.status_code == 200:
+            return data
+        else:
+            logger.log(level="error", handler="api_handler", message=f"Error getting game: {game}")
+            logger.log(level="error", handler="api_handler", message=data)
+            return {"status": "error"}
 
     def get_patch(self, game):
         return requests.get(self.api_url + self.launcher_game + "/" + game + "/patch")
