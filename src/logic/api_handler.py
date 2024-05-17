@@ -95,8 +95,8 @@ class ApiHandler:
     def get_patch(self, game):
         return requests.get(self.api_url + self.launcher_game + "/" + game + "/patch")
 
-    def download_file(self, file_id):
-        return requests.get(self.api_url + "/file" + file_id)
+    def download_file(self, file_url):
+        return requests.get(file_url)
 
 
 api_handler = ApiHandler()
