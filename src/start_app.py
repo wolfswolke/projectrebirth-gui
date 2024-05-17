@@ -40,6 +40,12 @@ def get_health():
     global api_status
     try:
         health_check_result = api_handler.get_healthcheck()
+        if not health_check_result:
+            with lock:
+                api_status = False
+        if health_check_result.status_code != 200:
+            with lock:
+                api_status = False
         if health_check_result.json()["Health"] == "Alive":
             with lock:
                 api_status = True
