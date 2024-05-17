@@ -1,7 +1,7 @@
 import os
 
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QPushButton, QTableWidget, QTableWidgetItem, \
-    QWidget, QHBoxLayout, QLabel, QDialog, QLineEdit, QGridLayout
+    QWidget, QHBoxLayout, QLabel, QDialog, QLineEdit, QGridLayout, QCheckBox
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
@@ -14,6 +14,10 @@ from logic.setup_handlers import update_config_item, load_config
 
 def open_website():
     os.system("start https://projectrebirth.net")
+    pass
+
+def open_issue_form():
+    os.system("start https://github.com/wolfswolke/projectrebirth-gui/issues/new/choose")
     pass
 
 
@@ -205,13 +209,80 @@ class SubView(QDialog):
             message_box("Error", "Failed to patch game. \nAn unknown error occurred.").exec_()
 
 
-
 def patch():
     ret_val = steam_parser.parse()
     if ret_val:
         message_box("Success", "Steam library scanned successfully").exec_()
     else:
         message_box("Error", "Failed to scan steam library").exec_()
+
+
+class Bug_Report_Form(QDialog):
+    def __init__(self):
+        super().__init__()
+        logger.log(level="debug", handler="window_handler", message="Opening bug report form")
+        self.setWindowTitle("Report a Bug")
+        self.setGeometry(300, 300, 300, 200)
+        self.setStyleSheet("background-color: #333333; color: white;")
+        layout = QVBoxLayout()
+        main_text = QLabel("Please fill out the form below to report a bug.")
+        layout.addWidget(main_text)
+        reporter_label = QLabel("Reporter:")
+        layout.addWidget(reporter_label)
+        self.reporter_input = QLineEdit()
+        layout.addWidget(self.reporter_input)
+        description_label = QLabel("Description:")
+        layout.addWidget(description_label)
+        self.bug_input = QLineEdit()
+        layout.addWidget(self.bug_input)
+        steps_label = QLabel("Steps to Reproduce:")
+        layout.addWidget(steps_label)
+        self.steps_input = QLineEdit()
+        layout.addWidget(self.steps_input)
+        expected_label = QLabel("Expected Result:")
+        layout.addWidget(expected_label)
+        self.expected_input = QLineEdit()
+        layout.addWidget(self.expected_input)
+        contact_label = QLabel("Contact (If you want):")
+        layout.addWidget(contact_label)
+        self.contact_input = QLineEdit()
+        layout.addWidget(self.contact_input)
+        self.log_id = self.log_uploader()
+        if self.log_id == 0:
+            message_box("Error", "Failed to upload log").exec_()
+            self.close()
+        submit_button = QPushButton("Submit")
+        submit_button.setStyleSheet("background-color: #6A5ACD; color: white;")
+        submit_button.clicked.connect(self.submit_bug)
+        layout.addWidget(submit_button)
+        self.setLayout(layout)
+        logger.log(level="debug", handler="window_handler", message="Opened bug report form")
+
+    def log_uploader(self):
+        with open("logs/log.log", "r") as f:
+            log = f.read()
+        data = {"log": log}
+        ret_data = api_handler.upload_log(data)
+        if ret_data.status_code == 200:
+            log_id = ret_data.json()["random_id"]
+            return log_id
+        else:
+            logger.log(level="error", handler="window_handler", message="Failed to upload log")
+            return 0
+
+    def submit_bug(self):
+        ret_val = api_handler.upload_bug_report(self.reporter_input.text(),
+                                      self.bug_input.text(),
+                                      self.steps_input.text(),
+                                      self.expected_input.text(),
+                                      self.contact_input.text(),
+                                      self.log_id)
+        if ret_val.status_code == 200:
+            message_box("Success", "Bug report submitted successfully").exec_()
+        else:
+            logger.log(level="error", handler="window_handler", message="Failed to submit bug report")
+            logger.log(level="error", handler="window_handler", message=ret_val)
+            message_box("Error", "Failed to submit bug report").exec_()
 
 
 class SettingsWindow(QDialog):
@@ -228,18 +299,23 @@ class SettingsWindow(QDialog):
         steam_scan.setStyleSheet("background-color: #6A5ACD; color: white;")
         steam_scan.clicked.connect(lambda: patch())
         layout.addWidget(steam_scan)
+
         button_report_bug = QPushButton("Report a Bug")
         button_report_bug.setStyleSheet("background-color: #6A5ACD; color: white;")
         # todo add logic to open a bug report form
+        button_report_bug.clicked.connect(lambda: Bug_Report_Form().exec_())
         layout.addWidget(button_report_bug)
+
         button_request_feature = QPushButton("Request a Feature")
         button_request_feature.setStyleSheet("background-color: #6A5ACD; color: white;")
-        # todo add logic to open a feature request form
+        button_request_feature.clicked.connect(open_issue_form)
         layout.addWidget(button_request_feature)
+
         button_check_for_updates = QPushButton("Check for Updates")
         button_check_for_updates.setStyleSheet("background-color: #6A5ACD; color: white;")
         button_check_for_updates.clicked.connect(lambda: updater_notification(api_handler.get_launcher_version().json()).exec_())
         layout.addWidget(button_check_for_updates)
+
         path_label = QLabel("Custom Steam Path:")
         layout.addWidget(path_label)
         self.path_input = QLineEdit()
