@@ -34,9 +34,20 @@ def open_settings_window():
 def get_health():
     logger.log(level="info", handler="window_handler", message="Checking API health.")
     health = api_handler.get_healthcheck()
-    if health.json()["Health"] == "Alive":
+    if not health:
+        # Connection Error no internet
+        message_box("Error", "Failed to connect to API").exec_()
+        return "Offline"
+    if health.status_code != 200:
+        # Network error API sided or IP sided
+        message_box("Error", "Failed to connect to API").exec_()
+        return "Offline"
+    health_data = health.json()["Health"]
+    if health_data == "Alive":
         return "Online"
     else:
+        # API internal Error or Maintenance
+        message_box("Error", f"API error {health_data}").exec_()
         return "Error"
 
 
@@ -155,9 +166,7 @@ class SubView(QDialog):
 
         download_button = QPushButton("Download Game")
         download_button.setStyleSheet("background-color: #6A5ACD; color: white;")
-        # todo THIS DOES NO EXIST YET
-        # Needs to be added on the API
-        # download_button.clicked.connect(lambda: file_handler.download_base_game(game_id))
+        download_button.clicked.connect(lambda: self.download_base_game(game_id))
         layout.addWidget(download_button, 4, 0, 1, 1)
 
         path_button = QPushButton("Patch Game")
@@ -168,7 +177,7 @@ class SubView(QDialog):
         version_label = QLabel(f"Version: {game_info['version']}")
         layout.addWidget(version_label, 0, 1, 1, 1)
 
-        team_label = QLabel(f"Team: {game_info['team']} (behind the rebirth)")
+        team_label = QLabel(f"Team (behind the rebirth): {game_info['team']}")
         layout.addWidget(team_label, 1, 1, 1, 1)
 
         official_label = QLabel("Official: " + ("Yes" if game_info['official'] else "No"))
@@ -179,6 +188,17 @@ class SubView(QDialog):
 
         self.setLayout(layout)
         logger.log(level="debug", handler="window_handler", message=f"Opened subview for game: {game_id}")
+
+
+    def download_base_game(self, game_id):
+        ret_val = file_handler.download_base_game(game_id)
+        if ret_val:
+            logger.log(level="info", handler="window_handler", message=f"Started download for game: {game_id}")
+            message_box("Success", "Successfully started download").exec_()
+        else:
+            logger.log(level="error", handler="window_handler", message=f"Failed to download game: {game_id}")
+            message_box("Error", "Failed to download game").exec_()
+
 
     def patch_game(self, game_id):
         data = api_handler.get_patch(game_id).json()

@@ -71,23 +71,28 @@ def rename(files, base_path):
         return False
 
 
-def download_base_game(provider, content):
+def download_base_game(game_id):
+    content = api_handler.get_patch(game_id).json()
+    print(content)
+    provider = content["provider"]
+    provider_data = content["provider_data"]
     if provider == "steam":
-        if content["mode"] == "live":
-            steamid = content["app_id"]
-            os.system(f"steam://run/{steamid}")
+        if provider_data["mode"] == "live":
+            steamid = provider_data["app_id"]
+            os.system(f"start steam://install/{steamid}")
             return True
         else:
             # todo add either STEAM logic or DepotDownloader logic here
-            app_id = content["app_id"]
-            depot_id = content["depot_id"]
-            manifest_id = content["manifest_id"]
+            app_id = provider_data["app_id"]
+            depot_id = provider_data["depot_id"]
+            manifest_id = provider_data["manifest_id"]
+            logger.log(level="info", handler="file_handler", message=f"Downloading game: {app_id} with depot: {depot_id} and manifest: {manifest_id}")
             pass
     elif provider == "battlenet":
         # todo add code to download bnetinstaller
-        product = content["product"]
-        uid = content["uid"]
-        lang = content["lang"]
+        product = provider_data["product"]
+        uid = provider_data["uid"]
+        lang = provider_data["lang"]
         pass
     elif provider == "epic":
         pass
@@ -148,6 +153,9 @@ class File_Handler:
         except Exception as e:
             logger.log(level="error", handler="file_handler", message=e)
             return 9
+
+    def download_base_game(self, game_id):
+        return download_base_game(game_id)
 
 
 file_handler = File_Handler()
