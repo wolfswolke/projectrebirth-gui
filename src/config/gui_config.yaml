@@ -2,7 +2,7 @@ global:
   name: Project Rebirth Launcher
   version: 0.0.1
   level: debug
-  installation_path: %localappdata%/ProjectRebirthLauncher
+  installation_path: "%localappdata%/ProjectRebirthLauncher"
 urls:
   api: https://api.projectrebirth.net
   website: https://projectrebirth.net
