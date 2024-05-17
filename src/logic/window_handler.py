@@ -107,9 +107,9 @@ class MainWindow(QMainWindow):
             image_label = QLabel()
             pixmap = QPixmap()
             pixmap.loadFromData(api_handler.get_image(item["image_url"]).content)
-            pixmap = pixmap.scaledToWidth(300)
-            pixmap = pixmap.scaledToHeight(450)
-            self.table.setRowHeight(num, 450)
+            pixmap = pixmap.scaledToWidth(150)
+            pixmap = pixmap.scaledToHeight(225)
+            self.table.setRowHeight(num, 225)
             image_label.setPixmap(pixmap)
             self.table.setCellWidget(i, 1, image_label)
             open_button = QPushButton("Open")
@@ -117,7 +117,7 @@ class MainWindow(QMainWindow):
             open_button.clicked.connect(lambda checked, item_id=item["ID"]: show_subview(item_id))
             self.table.setCellWidget(i, 2, open_button)
             num += 1
-        self.table.setColumnWidth(1, 300)
+        self.table.setColumnWidth(1, 150)
 
 
 class SubView(QDialog):
@@ -179,12 +179,31 @@ class SubView(QDialog):
     def patch_game(self, game_id):
         data = api_handler.get_patch(game_id).json()
         return_val = file_handler.patcher(data)
-        if return_val:
+        if return_val == 0:
             logger.log(level="info", handler="window_handler", message=f"Patched game: {game_id}")
             message_box("Success", "Game patched successfully").exec_()
+        elif return_val == 1:
+            logger.log(level="error", handler="window_handler", message=f"Failed to patch game: {game_id}")
+            message_box("Error", "Failed to patch game. \nSteam Path not Found. \nTry rescanning your library.").exec_()
+        elif return_val == 2:
+            logger.log(level="error", handler="window_handler", message=f"Failed to patch game: {game_id}")
+            message_box("Error", "Failed to patch game. \nA Problem occurred while deleting files.").exec_()
+        elif return_val == 3:
+            logger.log(level="error", handler="window_handler", message=f"Failed to patch game: {game_id}")
+            message_box("Error", "Failed to patch game. \nA Problem occurred while moving files.").exec_()
+        elif return_val == 4:
+            logger.log(level="error", handler="window_handler", message=f"Failed to patch game: {game_id}")
+            message_box("Error", "Failed to patch game. \nA Problem occurred while downloading files.").exec_()
+        elif return_val == 5:
+            logger.log(level="error", handler="window_handler", message=f"Failed to patch game: {game_id}")
+            message_box("Error", "Failed to patch game. \nA Problem occurred while renaming files.").exec_()
+        elif return_val == 9:
+            logger.log(level="error", handler="window_handler", message=f"Failed to patch game: {game_id}")
+            message_box("Error", "Failed to patch game. \nAn unknown file handler error occurred.").exec_()
         else:
             logger.log(level="error", handler="window_handler", message=f"Failed to patch game: {game_id}")
-            message_box("Error", "Failed to patch game").exec_()
+            message_box("Error", "Failed to patch game. \nAn unknown error occurred.").exec_()
+
 
 
 def patch():
