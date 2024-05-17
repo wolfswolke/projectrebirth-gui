@@ -46,6 +46,8 @@ class SteamLibraryFoldersParser:
                 elif line.startswith('\t\t\t'):
                     obj = line.split('\t\t\t')[1].strip()
                     app_id = int(obj.split('"')[1])
+                    current_path = current_path.replace("\\\\", "\\")
+                    current_path = current_path.replace('"', "")
                     self.add_game(app_id, current_path)
         logger.log(level="info", handler="steam_parser", message="Parsing complete")
         return True
