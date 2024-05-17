@@ -24,6 +24,22 @@ class Logger:
             print("ERROR: No valid log level specified.")
             sys.exit(1)
         self.log(level="debug", handler="logging_logic_event", message={"event": "Logging initialized."})
+        file_handler = logging.FileHandler("logs/log.log", mode="w")
+        file_handler.setLevel(logging.DEBUG)
+        formatter = ColoredFormatter(
+            "%(log_color)s%(asctime)s %(levelname)-8s%(reset)s %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+            reset=True,
+            log_colors={
+                'DEBUG': 'blue',
+                'INFO': 'white',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red,bg_white',
+            }
+        )
+        file_handler.setFormatter(formatter)
+        self.my_logger.addHandler(file_handler)
 
     def log(self, level, handler, message):
         formatter = ColoredFormatter(
