@@ -37,17 +37,14 @@ class ApiHandler:
     def upload_log(self, log):
         return requests.post(self.api_url + self.log_upload, json=log)
 
-    def upload_bug_report(self, reporter, description, steps, expected, discord, email, attachments, logs, anonymous):
+    def upload_bug_report(self, reporter, description, steps, expected, contact, log_id):
         data = {
             "Reporter": reporter,
             "Description": description,
             "Steps": steps,
             "Expected": expected,
-            "Discord": discord,
-            "Email": email,
-            "Attachments": attachments,
-            "Logs": logs,
-            "Anonymous": anonymous
+            "contact": contact,
+            "log_id": log_id
         }
         return requests.post(self.api_url + self.bug_report, json=data)
 
