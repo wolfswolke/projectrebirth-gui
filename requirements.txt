@@ -1,4 +1,4 @@
-requests~=2.32.1
+requests~=2.32.2
 PyYAML~=6.0.1
 colorlog~=6.8.2
 PyQt5~=5.15.10
